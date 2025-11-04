@@ -19,8 +19,10 @@ export async function updateStrategyStats(
     where: { strategyName: strategy },
   });
 
+  console.log("label:", label);
+
   const isHuman = label === "human";
-  const isMachine = label === "machine";
+  const isMachine = (label === "machine" || label === "unknown") ?? "machine";
 
   if (existing) {
     const updatedData = {

@@ -24,7 +24,7 @@ export async function POST(req: Request) {
       ? "human"
       : answeredBy?.startsWith("machine")
       ? "machine"
-      : "unknown";
+      : "machine";
 
   // create AMDResult record
   const amdResult = await prisma.aMDResult.create({
