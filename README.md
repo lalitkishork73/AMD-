@@ -147,7 +147,6 @@ User initiates a call → /api/twilio/makeCall
 Backend triggers:
 
 ```mermaid
-
 twilioClient.calls.create({
   to,
   from: process.env.TWILIO_PHONE_NUMBER!,
