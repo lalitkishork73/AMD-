@@ -54,7 +54,7 @@ graph TD
   C -->|If SIP Strategy| F[Jambonz Cloud]
   F -->|AMD Detection| D
   D -->|UI Update| A
-
+```
 
 # Better Auth Configuration
 BETTER_AUTH_SECRET=your_secret_key_here
