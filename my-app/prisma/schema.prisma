@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------- ENUMS --------------------
+
+enum StrategyType {
+  TWILIO_NATIVE
+  JAMBONZ
+  HUGGINGFACE
+  GEMINI
+}
+
+enum CallStatus {
+  INITIATED
+  QUEUED
+  RINGING
+  ANSWERED
+  HUMAN
+  MACHINE
+  FAILED
+  TIMEOUT
+  UNKNOWN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phoneNumber   String?   @unique
+  password      String?
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  calls         Call[]
+  emailVerified Boolean   @default(false)
+  image         String?
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  token     String
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+// -------------------- CALL TRACKING --------------------
+
+model Call {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  targetNumber String
+  strategy     StrategyType
+  status       CallStatus
+  twilioSid    String?      @unique
+  confidence   Float?
+  duration     Int?
+  cost         Float?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  audioLogs    AudioLog[]
+  amdResults   AMDResult[]
+
+  @@index([strategy])
+  @@index([status])
+  @@map("call")
+}
+
+// -------------------- AUDIO LOGS --------------------
+
+model AudioLog {
+  id        String   @id @default(cuid())
+  callId    String
+  call      Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+  s3Url     String? // location of the recorded clip (Twilio or S3)
+  duration  Int? // seconds
+  sizeKB    Int? // file size in KB
+  format    String? // e.g., 'wav', 'mp3'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("audio_log")
+}
+
+// -------------------- AMD RESULTS --------------------
+
+model AMDResult {
+  id          String   @id @default(cuid())
+  callId      String
+  call        Call     @relation(fields: [callId], references: [id], onDelete: Cascade)
+  modelName   String // e.g. "Twilio Native", "HF wav2vec", "Gemini Flash"
+  label       String // 'human' | 'machine' | 'unknown'
+  confidence  Float?
+  latencyMs   Int? // time taken in ms
+  rawResponse Json? // original payload from AI model or API
+  createdAt   DateTime @default(now())
+
+  @@index([modelName])
+  @@map("amd_result")
+}
+
+// -------------------- STRATEGY STATS --------------------
+
+model StrategyStats {
+  id              String       @id @default(cuid())
+  strategyName    StrategyType @unique
+  totalCalls      Int          @default(0)
+  humanDetected   Int          @default(0)
+  machineDetected Int          @default(0)
+  falsePositive   Int          @default(0)
+  falseNegative   Int          @default(0)
+  avgLatencyMs    Float?
+  avgConfidence   Float?
+  avgCost         Float?
+  lastUpdated     DateTime     @updatedAt
+
+  @@map("strategy_stats")
+}

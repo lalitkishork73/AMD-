@@ -1,0 +1,17 @@
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+
+export default async function AuthLayout ({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const session = await auth.api.getSession({ headers: await headers() });
+
+    // ✅ Redirect logged-in users to dashboard
+    if (session) redirect("/dashboard");
+
+    // ✅ Must return JSX, not an object
+    return <>{children}</>;
+}
