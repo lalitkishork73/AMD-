@@ -57,24 +57,36 @@ graph TD
 ```
 
 # Better Auth Configuration
+
+```mermaid
 BETTER_AUTH_SECRET=your_secret_key_here
 BETTER_AUTH_URL=http://localhost:3000
 PUBLIC_BETTER_AUTH_URL=https://your-ngrok-url.ngrok-free.app
+```
 
 # Twilio Configuration
+
+```mermaid
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_auth_token_here
 TWILIO_PHONE_NUMBER=+1234567890
 TWILIO_VOICE_URL=https://handler.twilio.com/twiml/EHxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 # Jambonz Configuration
+
+```mermaid
 JAMBONZ_API_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 JAMBONZ_APP_SID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 JAMBONZ_BASE_URL=https://api.jambonz.cloud
 JAMBONZ_ACCOUNT_SID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
 # Database Connection
+
+```mermaid
 DATABASE_URL="postgresql://user:password@localhost:5432/amd_db"
+````
 
 
 ##⚡ Quick Setup Steps
@@ -119,10 +131,12 @@ PUBLIC_BETTER_AUTH_URL=https://d43853eee539.ngrok-free.app
 
 # Inside your Twilio call creation:
 
+```mermaid
+
 url: `${process.env.PUBLIC_BETTER_AUTH_URL}/api/twilio/voice`,
 asyncAmdStatusCallback: `${process.env.PUBLIC_BETTER_AUTH_URL}/api/twilio/amd`,
 statusCallback: `${process.env.PUBLIC_BETTER_AUTH_URL}/api/twilio/status`,
-
+```
 
 Now Twilio can post data to your local backend during testing.
 
@@ -131,6 +145,8 @@ Now Twilio can post data to your local backend during testing.
 User initiates a call → /api/twilio/makeCall
 
 Backend triggers:
+
+```mermaid
 
 twilioClient.calls.create({
   to,
@@ -141,7 +157,7 @@ twilioClient.calls.create({
   asyncAmdStatusCallback: `${process.env.PUBLIC_BETTER_AUTH_URL}/api/twilio/amd`,
   statusCallback: `${process.env.PUBLIC_BETTER_AUTH_URL}/api/twilio/status`,
 });
-
+```
 
 Twilio performs AMD (Answering Machine Detection).
 
@@ -173,6 +189,7 @@ Historical Reports Store and export call metrics.
 
 # Repository Structure
 
+```mermaid
 ├── app/
 │   ├── api/
 │   │   └── twilio/
@@ -192,7 +209,7 @@ Historical Reports Store and export call metrics.
 ├── .gitignore
 ├── README.md
 └── package.json
-
+```
 
 # Key Improvements Summary
 
